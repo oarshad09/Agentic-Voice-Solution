@@ -1,0 +1,63 @@
+{
+  "call_id": "test_3_visa_question",
+  "timestamp": "2026-11-04T09:42:01.000301+00:00",
+  "duration_seconds": 74.0,
+  "termination_reason": "completed",
+  "post_call_model": "gpt-5.4-mini",
+  "metadata": {
+    "caller_name": "Ayesha",
+    "customer_name": "Ayesha",
+    "enquiry_route": "Dubai to London",
+    "phone_number": "+971503456789"
+  },
+  "outcome": "callback_requested",
+  "chosen_option": "Emirates option discussed on route Dubai to London",
+  "callback_time": "tomorrow morning",
+  "notes_for_consultant": "Caller: Ayesha, Route: Dubai to London. Termination: completed. Turns recorded: 11.",
+  "transcript": [
+    {
+      "role": "assistant",
+      "content": "Hi, this is Zaya calling from Ezee Flights. Am I speaking with Ayesha?"
+    },
+    {
+      "role": "user",
+      "content": "Hi, yes Ayesha speaking."
+    },
+    {
+      "role": "assistant",
+      "content": "Thanks for taking my call, Ayesha. I am following up on your flight enquiry for Dubai to London to see how we can help with your plans."
+    },
+    {
+      "role": "user",
+      "content": "Before we look at flights, I hold a Pakistani passport with UAE residency — do I need a visa for London and what documents do I need to submit?"
+    },
+    {
+      "role": "assistant",
+      "content": "Entry and visa requirements depend on your nationality and route and can change often, so I can't give visa or immigration advice — it's always best to confirm directly with the UK embassy or the airline, and our travel consultant can also point you in the right direction. Would you still like to look at the flight options for your dates?"
+    },
+    {
+      "role": "user",
+      "content": "Got it, thanks for clarifying. Let's look at return flights from Dubai to London departing 12 December and returning 2 January for 1 adult in economy."
+    },
+    {
+      "role": "assistant",
+      "content": "One moment, let me pull up the flights for the twelfth of December."
+    },
+    {
+      "role": "tool_call",
+      "content": "search_flights(query='return Dubai to London Heathrow, leave 12 December back 2 January, 1 adult, economy')"
+    },
+    {
+      "role": "assistant",
+      "content": "For the twelfth of December returning the second of January, there is a direct morning flight with Emirates leaving at eight fifteen at around two thousand four hundred dirhams, or a one-stop option with Turkish Airlines through Istanbul at around one thousand eight hundred and fifty dirhams, both including checked baggage and showing at the moment to be confirmed at booking. Which of those two looks better to you?"
+    },
+    {
+      "role": "user",
+      "content": "Please send me those two options on WhatsApp and have a consultant check in with me tomorrow morning."
+    },
+    {
+      "role": "assistant",
+      "content": "No problem at all. I will have both the Emirates direct and Turkish Airlines options sent to your WhatsApp on this number, and one of our consultants will follow up with you tomorrow morning — just keep in mind fares can move before booking. Thanks for your time, Ayesha, and speak tomorrow!"
+    }
+  ]
+}

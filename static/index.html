@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outbound Voice Agent Console</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">✈️</div>
+      <div>
+        <h1>Outbound Voice Agent</h1>
+        <p class="subtitle">Runtime Spec: <code>spec/flight_booking.json</code> + <code>prompt_overrides.yaml</code></p>
+      </div>
+    </div>
+    <div class="status-pills" id="statusPills">
+      <span class="pill pill-info" id="pillLlm">LLM: gpt-5.4-mini</span>
+      <span class="pill pill-info" id="pillTts">TTS: eleven_flash_v2_5</span>
+      <span class="pill pill-info" id="pillStt">STT: nova-3 (en, ar, hi, ur, es)</span>
+      <span class="pill pill-success" id="pillOverrides">6 Overrides Active</span>
+      <button type="button" class="btn btn-sm btn-secondary" id="btnOpenEnvModal">🔑 API Keys (.env)</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="console">🎙️ Live Voice-to-Voice Call</button>
+    <button class="tab-btn" data-tab="dispatch">📞 Outbound SIP Dispatch</button>
+    <button class="tab-btn" data-tab="kb">🔍 Flight KB &amp; Vector Search</button>
+    <button class="tab-btn" data-tab="calls">📋 Call Summaries &amp; 5 Tests</button>
+    <button class="tab-btn" data-tab="spec">⚙️ Spec &amp; Prompt Overrides</button>
+  </nav>
+
+  <main class="container">
+    <!-- TAB 1: LIVE VOICE-TO-VOICE CALL CONSOLE -->
+    <section class="tab-panel active" id="tab-console">
+      <div class="console-grid">
+        <!-- Left Sidebar: Call Setup -->
+        <aside class="card setup-card">
+          <h2>Call Parameters</h2>
+          <p class="muted">Injected into <code>Start.inputs</code> &amp; prompt placeholders before the call starts.</p>
+
+          <label class="field">
+            <span>Caller / Customer Name (<code>caller_name</code>)</span>
+            <input type="text" id="consoleName" value="Omair" placeholder="e.g. Omair" />
+          </label>
+
+          <label class="field">
+            <span>Enquiry Route (<code>enquiry_route</code>)</span>
+            <input type="text" id="consoleRoute" value="Dubai to London" placeholder="e.g. Dubai to London" />
+            <div class="route-chips">
+              <button type="button" class="chip route-preset" data-route="Dubai to London">DXB → London</button>
+              <button type="button" class="chip route-preset" data-route="Dubai to Karachi">DXB → Karachi</button>
+              <button type="button" class="chip route-preset" data-route="Dubai to Lahore">DXB → Lahore</button>
+              <button type="button" class="chip route-preset" data-route="Dubai to Jeddah">DXB → Jeddah</button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span>Phone Number (<code>phone_number</code>)</span>
+            <input type="text" id="consolePhone" value="+971501234567" placeholder="+9715XXXXXXX" />
+          </label>
+
+          <label class="field">
+            <span>Flight Search Backend (<code>KBFlight</code>)</span>
+            <select id="consoleProvider">
+              <option value="kb" selected>v2: KBProvider (Vector Store Top-5 + Rerank)</option>
+              <option value="static">v1: StaticProvider (RESPFlight.rawResponse)</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Spoken Language Hint (<code>Breez Ears</code>)</span>
+            <select id="consoleLang">
+              <option value="en-US" selected>English (en)</option>
+              <option value="ar-AE">Arabic — العربية (ar)</option>
+              <option value="ur-PK">Urdu — اردو (ur)</option>
+              <option value="hi-IN">Hindi — हिन्दी (hi)</option>
+              <option value="es-ES">Spanish — Español (es)</option>
+            </select>
+          </label>
+
+          <div class="toggle-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="toggleHandsFree" checked />
+              <span><strong>Hands-Free Duplex Voice Mode</strong> (auto-listen &amp; auto-send after 1.7s pause)</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="toggleTtsAudio" checked />
+              <span>Speak Zaya's replies aloud (TTS)</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="toggleOfficeNoise" />
+              <span><code>BGNoise_Office</code> ambience (use with headphones)</span>
+            </label>
+          </div>
+
+          <div class="call-actions">
+            <button type="button" class="btn btn-primary btn-block" id="btnStartCall">
+              📞 Start Voice-to-Voice Call
+            </button>
+            <button type="button" class="btn btn-danger btn-block" id="btnEndCall" disabled>
+              ⏹️ Hang Up &amp; Write Post-Call Summary
+            </button>
+          </div>
+
+          <div class="call-timers" id="callTimers">
+            <div class="timer-box">
+              <span class="timer-label">Call Duration (Max 10:00)</span>
+              <strong id="durationTimer">00:00</strong>
+            </div>
+            <div class="timer-box">
+              <span class="timer-label">Silence Watchdog (Max 30s)</span>
+              <strong id="silenceTimer">0s</strong>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Center: Live Voice Visualizer + Conversation -->
+        <div class="card chat-card">
+          <div class="chat-header">
+            <div class="agent-badge">
+              <span class="pulse-dot" id="callStateDot"></span>
+              <div>
+                <strong id="callStatusTitle">Ready for Voice Call</strong>
+                <span class="muted" id="callStatusSub">Click "Start Voice-to-Voice Call" and speak naturally into your mic</span>
+              </div>
+            </div>
+            <div class="voice-controls-row">
+              <button type="button" class="btn btn-sm btn-secondary" id="btnMuteMic" disabled>
+                🎙️ Mic Active
+              </button>
+              <button type="button" class="btn btn-sm btn-primary" id="btnForceSendSpeech" style="display:none;">
+                ✅ Send Speech Now
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Voice Stage: Orb + Mic Level + Real-time STT Captions -->
+          <div class="voice-stage" id="voiceStage">
+            <div class="voice-orb-wrap">
+              <div class="voice-orb" id="voiceOrb">🎙️</div>
+              <div class="voice-state-text">
+                <div class="voice-mode-badge" id="voiceModeBadge">IDLE — NOT IN CALL</div>
+                <div class="live-hearing-text" id="liveHearingText">
+                  Start the call — Zaya will greet you and your microphone will automatically listen after she speaks.
+                </div>
+              </div>
+            </div>
+            <div class="mic-meter-container" title="Live Microphone Input Volume">
+              <span class="mic-meter-label">MIC</span>
+              <div class="mic-meter-track">
+                <div class="mic-meter-fill" id="micMeterFill"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="transcript-box" id="transcriptBox">
+            <div class="empty-state">
+              <p>Click <strong>📞 Start Voice-to-Voice Call</strong> on the left.</p>
+              <p class="muted" style="margin-top:0.35rem;">
+                Hands-free turn-taking is enabled: speak into your microphone whenever the banner says
+                <strong>"🟢 LISTENING — SPEAK NOW"</strong>. Pause for ~1.7 seconds and Zaya will reply automatically!
+              </p>
+            </div>
+          </div>
+
+          <div class="quick-prompts">
+            <span class="quick-label">Or click a simulated caller utterance:</span>
+            <button type="button" class="chip quick-turn" data-text="Hi Zaya, yes this is Omair speaking.">1. Confirm Identity</button>
+            <button type="button" class="chip quick-turn" data-text="We're looking at a return trip from Dubai to London Heathrow, leaving 12 December and coming back 2 January, for 2 adults and 1 child age 6 in economy, direct preferred.">2. Give Trip Details (DXB-LHR)</button>
+            <button type="button" class="chip quick-turn" data-text="Two thousand four hundred dirhams per adult is too expensive for our budget. Can we move a day earlier to 11 December or take one stop?">3. "Too Expensive" Objection</button>
+            <button type="button" class="chip quick-turn" data-text="Before we book, I have a Pakistani passport — do I need a visa for the UK?">4. Visa Question</button>
+            <button type="button" class="chip quick-turn" data-text="I have an existing booking PNR EZF-88421 and I'm still waiting for my refund!">5. Existing Booking Refund</button>
+            <button type="button" class="chip quick-turn" data-text="Let's go with the Emirates morning flight — please connect me to the consultant now.">6. Ready to Book</button>
+            <button type="button" class="chip quick-turn" data-text="مرحباً زايا، أريد رحلة ذهاب وعودة من دبي إلى لندن في 12 ديسمبر والعودة 2 يناير لشخصين بالغين وطفل.">7. Arabic (العربية)</button>
+            <button type="button" class="chip quick-turn" data-text="Please don't call me again. Take my number off your list.">8. "Don't Call Me"</button>
+          </div>
+
+          <form class="chat-input-bar" id="chatForm">
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Hands-free mic is active during calls — or type here if you prefer..."
+              autocomplete="off"
+              disabled
+            />
+            <button type="submit" class="btn btn-primary" id="btnSendTurn" disabled>Send</button>
+          </form>
+        </div>
+
+        <!-- Right: Tool Inspector & Post-Call Summary -->
+        <aside class="card inspector-card">
+          <h2>Tool &amp; Post-Call Inspector</h2>
+          <div class="inspector-section">
+            <h3><code>@function_tool search_flights</code></h3>
+            <div id="toolCallsList" class="tool-calls-list">
+              <p class="muted">No <code>search_flights</code> calls executed in this session yet.</p>
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h3>Post-Call Summary (<code>calls/&lt;id&gt;.json</code>)</h3>
+            <div id="liveSummaryBox" class="summary-preview">
+              <p class="muted">End the call to generate and save the post-call JSON summary.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- TAB 2: OUTBOUND SIP DISPATCH -->
+    <section class="tab-panel" id="tab-dispatch">
+      <div class="two-col-grid">
+        <div class="card">
+          <h2>Place Outbound SIP Call (<code>dispatch_call.py</code>)</h2>
+          <p class="muted">Dispatches the LiveKit agent worker and dials out over your configured Twilio or UAE SIP trunk.</p>
+
+          <form id="dispatchForm">
+            <label class="field">
+              <span>Destination Phone Number (<code>--to</code>, E.164 format)</span>
+              <input type="text" id="dispPhone" value="+971501234567" required placeholder="+9715XXXXXXX" />
+            </label>
+
+            <label class="field">
+              <span>Caller / Customer Name (<code>--name</code>)</span>
+              <input type="text" id="dispName" value="Omair" placeholder="Omair" />
+            </label>
+
+            <label class="field">
+              <span>Enquiry Route (<code>--route</code>)</span>
+              <input type="text" id="dispRoute" value="Dubai to London" placeholder="Dubai to London" />
+            </label>
+
+            <label class="field">
+              <span>SIP Outbound Trunk ID (<code>SIP_OUTBOUND_TRUNK_ID</code>)</span>
+              <input type="text" id="dispTrunk" placeholder="Optional override (e.g. ST_xxxxxxxx)" />
+            </label>
+
+            <div class="btn-row">
+              <button type="submit" class="btn btn-primary" id="btnDispatchLive">📞 Dispatch Outbound Call</button>
+              <button type="button" class="btn btn-secondary" id="btnDispatchDry">🧪 Validate (Dry-Run)</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Dispatch Result &amp; CLI Equivalent</h2>
+          <div class="code-box" id="dispatchCliPreview">
+            python dispatch_call.py --to +971501234567 --name "Omair" --route "Dubai to London"
+          </div>
+          <pre class="json-viewer" id="dispatchOutput">Click "Dispatch Outbound Call" or "Validate (Dry-Run)" to inspect the dispatch payload.</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: FLIGHT KB & VECTOR SEARCH -->
+    <section class="tab-panel" id="tab-kb">
+      <div class="card">
+        <h2>Flight Inventory Vector Search (<code>KBFlight</code> → <code>RESPFlight</code>)</h2>
+        <p class="muted">
+          Test queries against <code>KBProvider</code> (v2 local vector store with query decomposition, candidate retrieval, and cross-feature reranking, <code>topK=5</code>) and <code>StaticProvider</code> (v1 raw response).
+        </p>
+
+        <form class="kb-search-bar" id="kbSearchForm">
+          <input
+            type="text"
+            id="kbQueryInput"
+            value="return Dubai to London Heathrow, leave 12 December back 2 January, 2 adults 1 child, direct preferred"
+            placeholder="Enter flight search query..."
+          />
+          <select id="kbProviderMode">
+            <option value="kb" selected>v2: KBProvider (Top-5 Reranked)</option>
+            <option value="static">v1: StaticProvider (Full Raw Text)</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Search Flights</button>
+        </form>
+
+        <div class="route-chips" style="margin-bottom: 1rem;">
+          <button type="button" class="chip kb-preset" data-q="return Dubai to London Heathrow, leave 12 December back 2 January, 2 adults 1 child, direct preferred">DXB-LHR 12 Dec Direct</button>
+          <button type="button" class="chip kb-preset" data-q="Dubai to London one day earlier 11 December cheapest connecting option">DXB-LHR 11 Dec Cheapest</button>
+          <button type="button" class="chip kb-preset" data-q="return flights Dubai to Karachi in December baggage and refund rules">DXB-KHI Return</button>
+          <button type="button" class="chip kb-preset" data-q="Dubai to Lahore return PIA or Emirates">DXB-LHE Return</button>
+          <button type="button" class="chip kb-preset" data-q="Dubai to Jeddah Umrah flights and Zamzam allowance">DXB-JED Umrah</button>
+          <button type="button" class="chip kb-preset" data-q="family hotel in London near Paddington or King's Cross">London Hotels Cross-sell</button>
+        </div>
+
+        <div class="two-col-grid">
+          <div>
+            <h3>Top-5 Reranked Vector Chunks (<code>KBProvider</code>)</h3>
+            <div id="kbChunksOutput" class="chunks-list"></div>
+          </div>
+          <div>
+            <h3>Tool Return Text Sent to LLM</h3>
+            <pre class="json-viewer" id="kbRawOutput"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: CALL SUMMARIES & 5 TEST CONVERSATIONS -->
+    <section class="tab-panel" id="tab-calls">
+      <div class="card">
+        <div class="section-header-row">
+          <div>
+            <h2>Post-Call Summaries (<code>calls/*.json</code>) &amp; 5 Test Scenarios</h2>
+            <p class="muted">Every completed call or test conversation writes a structured JSON summary via <code>post_call.py</code>.</p>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" id="btnRunAllTests">▶️ Run 5 Text-Only Test Conversations</button>
+            <button type="button" class="btn btn-secondary" id="btnRefreshCalls">🔄 Refresh List</button>
+          </div>
+        </div>
+
+        <div class="two-col-grid">
+          <div>
+            <h3>Recorded Call Summaries</h3>
+            <div id="callsListContainer" class="calls-list"></div>
+          </div>
+          <div>
+            <h3>Selected Call Summary &amp; Transcript</h3>
+            <div id="callDetailContainer" class="call-detail-box">
+              <p class="muted">Select any call on the left to inspect its outcome, chosen option, consultant notes, and full transcript.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: SPEC & PROMPT OVERRIDES -->
+    <section class="tab-panel" id="tab-spec">
+      <div class="two-col-grid">
+        <div class="card">
+          <h2>Applied <code>prompt_overrides.yaml</code> Layer</h2>
+          <p class="muted">Applied in-memory at runtime so <code>spec/flight_booking.json</code> remains untouched.</p>
+          <ul class="overrides-list" id="overridesList"></ul>
+
+          <h3 style="margin-top: 1.5rem;">Extracted Node Configuration</h3>
+          <pre class="json-viewer" id="specConfigViewer"></pre>
+        </div>
+
+        <div class="card">
+          <h2>Rendered System Prompt Preview</h2>
+          <p class="muted">Combines <code>Start.masterInstruction</code> (first) + <code>eandAI.instructions</code> with placeholders resolved.</p>
+          <pre class="json-viewer prompt-viewer" id="promptPreviewBox"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: API KEYS (.ENV) -->
+  <div class="modal-backdrop" id="envModal" style="display:none;">
+    <div class="modal-card card">
+      <div class="section-header-row">
+        <h2>🔑 Configure API Keys (<code>.env</code>)</h2>
+        <button type="button" class="btn btn-sm btn-secondary" id="btnCloseEnvModal">✕</button>
+      </div>
+      <p class="muted">
+        Optional: Enter your keys below to switch from the built-in browser speech &amp; local spec engine to live OpenAI <code>gpt-5.4-mini</code>, ElevenLabs <code>eleven_flash_v2_5</code>, and Deepgram <code>nova-3</code>.
+      </p>
+      <form id="envForm">
+        <label class="field">
+          <span><code>OPENAI_API_KEY</code> (LLM + Post-Call Summary + Whisper STT fallback)</span>
+          <input type="password" id="envOpenaiKey" placeholder="sk-proj-..." />
+        </label>
+        <label class="field">
+          <span><code>ELEVEN_API_KEY</code> (ElevenLabs <code>eleven_flash_v2_5</code> voice synthesis)</span>
+          <input type="password" id="envElevenKey" placeholder="sk_..." />
+        </label>
+        <label class="field">
+          <span><code>ELEVEN_VOICE_ID</code> (Defaults to <code>ack0QsRaQyDLnVyMQTSd</code>)</span>
+          <input type="text" id="envElevenVoice" placeholder="ack0QsRaQyDLnVyMQTSd" />
+        </label>
+        <label class="field">
+          <span><code>DEEPGRAM_API_KEY</code> (Deepgram Nova-3 Multilingual STT)</span>
+          <input type="password" id="envDeepgramKey" placeholder="Deepgram API Key" />
+        </label>
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary">Save to .env &amp; Reload</button>
+          <button type="button" class="btn btn-secondary" id="btnCancelEnvModal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

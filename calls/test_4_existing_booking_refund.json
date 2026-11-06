@@ -1,0 +1,47 @@
+{
+  "call_id": "test_4_existing_booking_refund",
+  "timestamp": "2026-11-04T09:42:01.002263+00:00",
+  "duration_seconds": 55.5,
+  "termination_reason": "completed",
+  "post_call_model": "gpt-5.4-mini",
+  "metadata": {
+    "caller_name": "Faisal",
+    "customer_name": "Faisal",
+    "enquiry_route": "Dubai to Karachi",
+    "phone_number": "+971504567890"
+  },
+  "outcome": "existing_booking_or_refund",
+  "chosen_option": null,
+  "callback_time": null,
+  "notes_for_consultant": "Caller: Faisal, Route: Dubai to Karachi. Termination: completed. Turns recorded: 7.",
+  "transcript": [
+    {
+      "role": "assistant",
+      "content": "Hi, this is Zaya calling from Ezee Flights. Am I speaking with Faisal?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, this is Faisal."
+    },
+    {
+      "role": "assistant",
+      "content": "Thanks for taking my call, Faisal. I am following up on an enquiry we received for Dubai to Karachi."
+    },
+    {
+      "role": "user",
+      "content": "Look, I'm not looking for a new flight right now. I cancelled an existing booking last week and I still haven't received my refund! How much am I getting back and when will it hit my card?"
+    },
+    {
+      "role": "assistant",
+      "content": "I completely understand how frustrating it is waiting on a refund, Faisal. Refund amounts and timelines depend on the airline's fare rules and are handled directly by our support team — if you can share your booking reference and the lead passenger's name, I will pass this straight to them to follow up with you."
+    },
+    {
+      "role": "user",
+      "content": "The booking reference is EZF-88421 and the lead passenger name is Faisal Ahmed. Please have support call me back this afternoon."
+    },
+    {
+      "role": "assistant",
+      "content": "Thank you, I have noted booking reference EZF-88421 under lead passenger Faisal Ahmed and flagged it for our support team to call you back this afternoon on this number with an update on your refund. Thank you for your patience, and goodbye."
+    }
+  ]
+}

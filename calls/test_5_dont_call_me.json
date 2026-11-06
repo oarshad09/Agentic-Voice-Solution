@@ -1,0 +1,39 @@
+{
+  "call_id": "test_5_dont_call_me",
+  "timestamp": "2026-11-04T09:42:01.002263+00:00",
+  "duration_seconds": 37.0,
+  "termination_reason": "completed",
+  "post_call_model": "gpt-5.4-mini",
+  "metadata": {
+    "caller_name": "Sami",
+    "customer_name": "Sami",
+    "enquiry_route": "Dubai to Jeddah",
+    "phone_number": "+971505678901"
+  },
+  "outcome": "opted_out_do_not_call",
+  "chosen_option": null,
+  "callback_time": null,
+  "notes_for_consultant": "Caller: Sami, Route: Dubai to Jeddah. Termination: completed. Turns recorded: 5.",
+  "transcript": [
+    {
+      "role": "assistant",
+      "content": "Hi, this is Zaya calling from Ezee Flights. Am I speaking with Sami?"
+    },
+    {
+      "role": "user",
+      "content": "Yeah, speaking."
+    },
+    {
+      "role": "assistant",
+      "content": "Thanks for taking my call, Sami. I'm following up on the flight enquiry for Dubai to Jeddah."
+    },
+    {
+      "role": "user",
+      "content": "Please don't call me again. Take my number off your calling list right now."
+    },
+    {
+      "role": "assistant",
+      "content": "I'm sorry to have bothered you, Sami. I will remove your number from our contact list right away so you won't be called again. Thank you for your time, goodbye."
+    }
+  ]
+}

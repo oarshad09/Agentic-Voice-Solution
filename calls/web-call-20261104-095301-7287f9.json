@@ -1,0 +1,47 @@
+{
+  "call_id": "web-call-20261104-095301-7287f9",
+  "timestamp": "2026-11-04T09:55:21.296656+00:00",
+  "duration_seconds": 140.17,
+  "termination_reason": "user_hangup",
+  "post_call_model": "gpt-5.4-mini",
+  "metadata": {
+    "caller_name": "Omair",
+    "customer_name": "Omair",
+    "enquiry_route": "Dubai to London",
+    "phone_number": "+971501234567"
+  },
+  "outcome": "incomplete",
+  "chosen_option": "Turkish Airlines option discussed on route Dubai to London",
+  "callback_time": null,
+  "notes_for_consultant": "Caller: Omair, Route: Dubai to London. Termination: user_hangup. Turns recorded: 7.",
+  "transcript": [
+    {
+      "role": "assistant",
+      "content": "Hi, this is Zaya calling from Ezee Flights. Am I speaking with Omair?"
+    },
+    {
+      "role": "user",
+      "content": "Hi Zaya, yes this is Omair speaking."
+    },
+    {
+      "role": "assistant",
+      "content": "Thanks for taking my call, Omair. I am following up on the flight enquiry you sent us for Dubai to London. What dates are you looking to fly, and will it be a return trip?"
+    },
+    {
+      "role": "user",
+      "content": "Two thousand four hundred dirhams per adult is too expensive for our budget. Can we move a day earlier to 11 December or take one stop?"
+    },
+    {
+      "role": "assistant",
+      "content": "Let me see what comes up if we move a day earlier or look at a connecting flight."
+    },
+    {
+      "role": "tool_call",
+      "content": "search_flights(query='return Dubai to London, leave 11 December one day earlier or connecting flight, cheapest options')"
+    },
+    {
+      "role": "assistant",
+      "content": "If we move departure one day earlier to Friday the eleventh of December, Turkish Airlines with one stop in Istanbul comes down to around one thousand seven hundred and fifty dirhams per adult and one thousand four hundred and twenty per child, including a twenty-three kilo checked bag. There is also Gulf Air via Bahrain at around one thousand six hundred and ninety dirhams per adult, though that fare is hand luggage only with no checked bag included. Both are the fares showing right now, confirmed at booking — which of those two works better for you?"
+    }
+  ]
+}

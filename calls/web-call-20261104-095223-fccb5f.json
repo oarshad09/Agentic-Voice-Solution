@@ -1,0 +1,23 @@
+{
+  "call_id": "web-call-20261104-095223-fccb5f",
+  "timestamp": "2026-11-04T09:53:00.785665+00:00",
+  "duration_seconds": 37.09,
+  "termination_reason": "silence_timeout",
+  "post_call_model": "gpt-5.4-mini",
+  "metadata": {
+    "caller_name": "Omair",
+    "customer_name": "Omair",
+    "enquiry_route": "Dubai to London",
+    "phone_number": "+971501234567"
+  },
+  "outcome": "incomplete",
+  "chosen_option": null,
+  "callback_time": null,
+  "notes_for_consultant": "Caller: Omair, Route: Dubai to London. Termination: silence_timeout. Turns recorded: 1.",
+  "transcript": [
+    {
+      "role": "assistant",
+      "content": "Hi, this is Zaya calling from Ezee Flights. Am I speaking with Omair?"
+    }
+  ]
+}

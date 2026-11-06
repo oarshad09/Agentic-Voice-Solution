@@ -1,0 +1,10 @@
+livekit>=1.0.0
+livekit-api>=1.0.0
+livekit-agents[deepgram,openai,elevenlabs,silero,turn-detector]>=1.0.0,<2.0.0
+livekit-plugins-soniox>=1.0.0,<2.0.0
+openai>=1.40.0
+PyYAML>=6.0.0
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+numpy>=1.26.0
+

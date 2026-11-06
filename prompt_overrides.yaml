@@ -1,0 +1,46 @@
+# Runtime overrides applied on top of spec/flight_booking.json without modifying the source JSON.
+# Keeps spec/flight_booking.json untouched while resolving known schema/prompt inconsistencies.
+
+persona_standardization:
+  target_name: "Zaya"
+  replacements:
+    Start.parameters.masterInstruction:
+      - from: "You are only Anna,"
+        to: "You are only Zaya,"
+    Start.parameters.inputs[caller_name].description:
+      - from: "leave empty and Nour will simply ask for it."
+        to: "leave empty and Zaya will simply ask for it."
+
+input_mappings:
+  # Map {{customer_name}} to caller_name (if customer_name is not explicitly provided, fallback to caller_name, and vice-versa)
+  customer_name_alias: "caller_name"
+  additional_inputs:
+    - variable_name: "customer_name"
+      type: "string"
+      required: false
+      description: "Alias for caller_name used in the eandAI system prompt."
+    - variable_name: "enquiry_route"
+      type: "string"
+      required: false
+      description: "Optional route the caller enquired about (e.g., 'Dubai to London')."
+    - variable_name: "phone_number"
+      type: "string"
+      required: false
+      description: "Caller's phone number in international format (e.g., '+971500000000')."
+
+tool_overrides:
+  SearchFlights:
+    inputs:
+      query:
+        description: >-
+          What to look up, in the caller's own words plus what they want to know.
+          E.g. 'return Dubai to London Heathrow 12 Dec to 2 Jan, 2 adults 1 child, direct',
+          'baggage and refund rules on the Emirates morning option',
+          'cheapest return flights Dubai to Karachi or Lahore in December'.
+
+stt_overrides:
+  Breez Ears:
+    add_language_hints:
+      - "ur"
+      - "es"
+

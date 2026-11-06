@@ -1,0 +1,63 @@
+{
+  "call_id": "test_1_happy_path_booking",
+  "timestamp": "2026-11-04T09:42:00.993292+00:00",
+  "duration_seconds": 74.0,
+  "termination_reason": "completed",
+  "post_call_model": "gpt-5.4-mini",
+  "metadata": {
+    "caller_name": "Omair",
+    "customer_name": "Omair",
+    "enquiry_route": "Dubai to London",
+    "phone_number": "+971501234567"
+  },
+  "outcome": "ready_to_book",
+  "chosen_option": "Emirates option discussed on route Dubai to London",
+  "callback_time": null,
+  "notes_for_consultant": "Caller: Omair, Route: Dubai to London. Termination: completed. Turns recorded: 11.",
+  "transcript": [
+    {
+      "role": "assistant",
+      "content": "Hi, this is Zaya calling from Ezee Flights. Am I speaking with Omair?"
+    },
+    {
+      "role": "user",
+      "content": "Hi Zaya, yes this is Omair speaking."
+    },
+    {
+      "role": "assistant",
+      "content": "Thanks for taking my call, Omair. I am following up on the flight enquiry you sent us for Dubai to London. I wanted to understand your plans a bit more and find you the right option."
+    },
+    {
+      "role": "user",
+      "content": "Yes, we're planning a family holiday to London Heathrow. Looking at returning, leaving Dubai on 12 December and coming back on 2 January."
+    },
+    {
+      "role": "assistant",
+      "content": "A family holiday to London in December sounds lovely. How many adults and children will be travelling?"
+    },
+    {
+      "role": "user",
+      "content": "It'll be two adults and one child — she's six years old. Economy class is fine, and we'd prefer a direct flight if possible."
+    },
+    {
+      "role": "assistant",
+      "content": "Let me see what's flying that day for the three of you."
+    },
+    {
+      "role": "tool_call",
+      "content": "search_flights(query='return Dubai to London Heathrow, leave 12 December back 2 January, 2 adults 1 child age 6, economy, direct preferred')"
+    },
+    {
+      "role": "assistant",
+      "content": "Since you are travelling with your six-year-old, the Emirates direct morning flight is a great fit — it leaves Dubai at eight fifteen in the morning and lands at London Heathrow at twelve ten in the afternoon, with twenty-five kilos of checked baggage each, at around two thousand four hundred dirhams per adult and one thousand nine hundred and fifty for your child, which comes to six thousand seven hundred and fifty dirhams in total. If you'd like a cheaper option, Turkish Airlines has a flight with one stop in Istanbul at around one thousand eight hundred and fifty dirhams per adult, totalling five thousand two hundred dirhams for the family. Both are the fares showing right now, confirmed at booking — which of those sounds closer to what you want?"
+    },
+    {
+      "role": "user",
+      "content": "The Emirates morning direct flight at two thousand four hundred dirhams per adult sounds great for us with our daughter. Let's go with that one — you can connect me with the consultant now."
+    },
+    {
+      "role": "assistant",
+      "content": "Wonderful, I have noted the Emirates direct morning departure on the twelfth of December returning the second of January for two adults and one child. Let me get one of our travel consultants to pick this up with you directly on this number to confirm the live fare and send over your secure payment link. Thank you for choosing Ezee Flights, and have a lovely trip!"
+    }
+  ]
+}

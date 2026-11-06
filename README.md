@@ -1,4 +1,4 @@
-# Ezee Flights — Self-Hosted Outbound Voice Agent (Zaya)
+# Self-Hosted Outbound Voice Agent
 
 A self-hosted outbound voice agent built on **Python 3.11+** and **LiveKit Agents 1.x (`livekit-agents`)** that executes the workflow defined in [`spec/flight_booking.json`](spec/flight_booking.json).
 
@@ -11,7 +11,7 @@ A self-hosted outbound voice agent built on **Python 3.11+** and **LiveKit Agent
 | JSON Node | Implementation |
 | :--- | :--- |
 | `Start.masterInstruction` | Global system-prompt prefix (identity & hard rules), always placed first in `AgentSpec.build_system_prompt()` |
-| `eandAI.instructions` | Main agent instructions, appended immediately after `masterInstruction` |
+| `AI.instructions` | Main agent instructions, appended immediately after `masterInstruction` |
 | `Start.inputs` / `workflow_inputs` (`caller_name`) | Parsed from LiveKit job/room metadata via `CallMetadata` (`caller_name`, `customer_name`, `enquiry_route`, `phone_number`) |
 | `{{$node("Start").caller_name}}`, `{{customer_name}}`, `{{enquiry_route}}` | Rendered before the session starts in `spec_loader.render_placeholders()`. Empty values resolve to `""`, never a literal placeholder |
 | `Breez Ears` | `providers/stt.py` (`build_stt`): Deepgram `nova-3` (`language="multi"`) by default, or swappable to `soniox` (`STT_PROVIDER=soniox`). Extracts 76 domain keyterms from `Breez Ears.context`, language hints `["en", "ar", "hi", "ur", "es"]`, and `max_endpoint_delay_ms=1720` |
@@ -31,17 +31,17 @@ A self-hosted outbound voice agent built on **Python 3.11+** and **LiveKit Agent
 
 The source file `spec/flight_booking.json` is **never modified**. Instead, [`prompt_overrides.yaml`](prompt_overrides.yaml) applies four targeted fixes at runtime in `spec_loader.py`:
 
-1. **Persona Name Standardisation (`Anna` / `Zaya` / `Nour` → `Zaya`)**
-   - *Issue in JSON*: `Start.parameters.masterInstruction` says `"You are only Anna"`, `eandAI.parameters.instructions` says `"You are Zaya"`, and `Start.parameters.inputs[0].description` says `"leave empty and Nour will simply ask for it."`
-   - *Override*: Standardises all three to **Zaya** in `persona_standardization.replacements`.
+1. **Persona Name Standardisation (`Anna` / `agent` / `Nour` → `agent`)**
+   - *Issue in JSON*: `Start.parameters.masterInstruction` says `"You are only Anna"`, `AI.parameters.instructions` says `"You are agent"`, and `Start.parameters.inputs[0].description` says `"leave empty and Nour will simply ask for it."`
+   - *Override*: Standardises all three to **agent** in `persona_standardization.replacements`.
 2. **Input Variable Mapping (`{{customer_name}}` and `{{enquiry_route}}`)**
-   - *Issue in JSON*: `eandAI.parameters.instructions` references `{{customer_name}}` and `{{enquiry_route}}` (as well as `{{$node("Start").caller_name}}` and `{{$phoneNumber('international', 'external_number')}}`), while `workflow_inputs` only declares `caller_name`.
+   - *Issue in JSON*: `AI.parameters.instructions` references `{{customer_name}}` and `{{enquiry_route}}` (as well as `{{$node("Start").caller_name}}` and `{{$phoneNumber('international', 'external_number')}}`), while `workflow_inputs` only declares `caller_name`.
    - *Override*: Maps `customer_name` ↔ `caller_name` bidirectionally and adds optional dispatch inputs `enquiry_route` and `phone_number`. Any missing value renders as `""`, never a literal `{{...}}` string.
 3. **`SearchFlights` Input Query Description (Real-Estate Examples → Flight Examples)**
    - *Issue in JSON*: `SearchFlights.parameters.inputs[0].description` contains copy-pasted real-estate examples (`'available sea-view two-beds in Coral around 3.5'`, `'Pearl payment schedule'`, `'schools near Dubai Islands'`).
    - *Override*: Replaces the `query` parameter description with flight-specific examples (`'return Dubai to London Heathrow 12 Dec to 2 Jan, 2 adults 1 child, direct'`, `'baggage and refund rules on the Emirates morning option'`, `'cheapest return flights Dubai to Karachi or Lahore in December'`).
 4. **STT Language Hints (`en`, `ar`, `hi` → `en`, `ar`, `hi`, `ur`, `es`)**
-   - *Issue in JSON*: `Start.masterInstruction` and `eandAI.instructions` promise the agent will mirror English, Arabic, Hindi, **Urdu**, and **Spanish**, but `Breez Ears.parameters.language_hints` only lists `["en", "ar", "hi"]`.
+   - *Issue in JSON*: `Start.masterInstruction` and `AI.instructions` promise the agent will mirror English, Arabic, Hindi, **Urdu**, and **Spanish**, but `Breez Ears.parameters.language_hints` only lists `["en", "ar", "hi"]`.
    - *Override*: Appends `"ur"` and `"es"` to `Breez Ears.language_hints`.
 
 ---
@@ -76,7 +76,7 @@ python agent.py download-files
 
 ### 0. Localhost Frontend Web App (`http://localhost:8080`)
 
-Launch the interactive browser console to talk to Zaya via your microphone or text, inspect `search_flights` vector chunks, trigger outbound SIP calls, and browse saved `calls/*.json` summaries:
+Launch the interactive browser console to talk to agent via your microphone or text, inspect `search_flights` vector chunks, trigger outbound SIP calls, and browse saved `calls/*.json` summaries:
 
 ```bash
 python web_app.py --port 8080
@@ -86,7 +86,7 @@ Then open **http://localhost:8080** in your browser.
 
 ### 1. Console Mode (Laptop Mic & Speakers — No SIP Required)
 
-Talk to Zaya directly from your terminal in English, Arabic, Urdu, Hindi, or Spanish:
+Talk to agent directly from your terminal in English, Arabic, Urdu, Hindi, or Spanish:
 
 ```bash
 python agent.py console
@@ -123,8 +123,8 @@ python dispatch_call.py --to +9715XXXXXXX --name "Omair" --route "Dubai to Londo
 ### 3. Docker Deployment
 
 ```bash
-docker build -t ezee-flights-agent .
-docker run --env-file .env -v $(pwd)/calls:/app/calls ezee-flights-agent
+docker build -t -flights-agent .
+docker run --env-file .env -v $(pwd)/calls:/app/calls -flights-agent
 ```
 
 ---
